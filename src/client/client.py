@@ -6,40 +6,44 @@ def receiveMessages(client):
     while True:
         try:
             msg = client.recv(2048).decode("utf-8")
-            print(msg+"\n")
-        except Exception as e:
-            print(f"\nErro {e}\n")
-            print("Pressione <Enter> Para continuar...")
-            client.close()
+            if not msg:
+                break
+            print(msg)
+        except Exception:
             break
 
 
-def sendMessages(client, username):
+def sendMessages(client):
     while True:
         try:
-            msg = input("\n")
-            client.send(f"<{username}> {msg}".encode("utf-8"))
-        except Exception as e:
-            print(f"\nErro {e}\n")
-            return
+            msg = input()
+            client.send(msg.encode("utf-8"))
+        except Exception:
+            break
 
 
 def main():
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    try:
-        client.connect(("localhost", 7777))
-    except Exception as e:
-        return print(f"\nErro: {e}\n")
+    client.connect(("localhost", 7777))
 
     username = input("Usuário> ")
-    print("\nConectado")
+    client.send(username.encode("utf-8"))
 
-    thread1 = threading.Thread(target=receiveMessages, args=[client])
-    thread2 = threading.Thread(target=sendMessages, args=[client, username])
+    print(">> Conectado ao chat\n")
 
-    thread1.start()
-    thread2.start()
+    threading.Thread(
+        target=receiveMessages,
+        args=(client,),
+        daemon=True
+    ).start()
+    threading.Thread(
+        target=sendMessages,
+        args=(client,),
+        daemon=True
+    ).start()
+
+    while True:
+        pass
 
 
 if __name__ == "__main__":
