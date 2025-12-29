@@ -9,9 +9,8 @@ def handle_client(client):
         username = client.recv(2048).decode("utf-8")
         clients[client] = username
         print(f"{username} entrou no chat")
-        broadcast(f">> {username} entrou no chat\n".encode("utf-8"), client)
-    except Exception as e:
-        print(f"\nErro: {e}\n")
+        broadcast_server(f">> {username} entrou no chat\n".encode("utf-8"))
+    except Exception:
         client.close()
         return
 
@@ -21,22 +20,28 @@ def handle_client(client):
             if not msg:
                 break
             full_msg = f"{clients[client]}: {msg.decode('utf-8')}"
-            broadcast(full_msg.encode("utf-8"), client)
-        except Exception as e:
-            print(f"\nErro: {e}\n")
+            broadcast_client(full_msg.encode("utf-8"), client)
+        except Exception:
             break
 
     remove_client(client)
 
 
-def broadcast(msg, sender):
+def broadcast_client(msg, sender):
     for client in list(clients.keys()):
-        if sender is not None or client != sender:
+        if client != sender:
             try:
                 client.send(msg)
-            except Exception as e:
-                print(f"\nErro: {e}\n")
+            except Exception:
                 remove_client(client)
+
+
+def broadcast_server(msg):
+    for client in list(clients.keys()):
+        try:
+            client.send(msg)
+        except Exception:
+            remove_client(client)
 
 
 def remove_client(client):
@@ -44,7 +49,7 @@ def remove_client(client):
         username = clients[client]
         del clients[client]
         client.close()
-        broadcast(f">> {username} saiu do chat\n".encode("utf-8"), None)
+        broadcast_server(f">> {username} saiu do chat\n".encode("utf-8"))
         print(f"{username} saiu")
 
 
