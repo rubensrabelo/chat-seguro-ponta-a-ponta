@@ -31,19 +31,14 @@ def main():
 
     print(">> Conectado ao chat\n")
 
-    threading.Thread(
-        target=receiveMessages,
-        args=(client,),
-        daemon=True
-    ).start()
-    threading.Thread(
-        target=sendMessages,
-        args=(client,),
-        daemon=True
-    ).start()
+    t1 = threading.Thread(target=receiveMessages, args=(client,), daemon=True)
+    t2 = threading.Thread(target=sendMessages, args=(client,), daemon=True)
 
-    while True:
-        pass
+    t1.start()
+    t2.start()
+
+    t1.join()
+    t2.join()
 
 
 if __name__ == "__main__":
