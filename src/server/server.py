@@ -31,7 +31,7 @@ def handle_client(client):
 
 def broadcast(msg, sender):
     for client in list(clients.keys()):
-        if client != sender:
+        if sender is not None or client != sender:
             try:
                 client.send(msg)
             except Exception as e:
