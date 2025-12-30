@@ -12,6 +12,20 @@ private_key, public_key = rsa_utils.generate_keys()
 session_key = None
 mode = None
 
+MODE_FILE = "./src/client/crypto_mode.txt"
+
+
+def save_mode(selected_mode):
+    with open(MODE_FILE, "w") as f:
+        f.write(selected_mode)
+
+
+def load_mode():
+    if not os.path.exists(MODE_FILE):
+        return None
+    with open(MODE_FILE, "r") as f:
+        return f.read().strip()
+
 
 def receiveMessages(client):
     global session_key
@@ -47,9 +61,9 @@ def receiveMessages(client):
                         if mode == "CBC"
                         else ctr.decrypt(session_key, data)
                     )
-                    print(plaintext.decode())
+                    print(plaintext.decode(errors="ignore"))
                 else:
-                    print(msg.decode())
+                    print(msg.decode(errors="ignore"))
 
         except Exception:
             stop_event.set()
@@ -85,8 +99,10 @@ def main():
 
     if user_id == 1:
         mode = input("Modo (CBC/CTR)> ").strip().upper()
+        save_mode(mode)  # <<< SALVA O MODO
     else:
-        mode = "CBC"
+        mode = load_mode()  # <<< CARREGA O MODO
+        print(f">> Modo carregado: {mode}")
 
     # ENVIA CHAVE PÚBLICA
     client.send(b"RSAKEY:" + public_key)
