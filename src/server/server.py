@@ -8,12 +8,13 @@ clients_lock = threading.Lock()
 
 def handle_client(client):
     try:
+        # ALTERAÇÃO: username continua em texto
         username = client.recv(2048).decode("utf-8")
 
         with clients_lock:
             if not available_ids:
                 client.send(
-                    "Servidor cheio (máx 2 usuários)\n".encode("utf-8")
+                    b"Servidor cheio (max 2 usuarios)\n"
                 )
                 client.close()
                 return
@@ -22,7 +23,10 @@ def handle_client(client):
             available_ids.remove(user_id)
             clients[client] = {"id": user_id, "name": username}
 
-        print(f"{username} entrou")
+        # ALTERAÇÃO: envia o ID do usuário
+        client.send(f"ID:{user_id}".encode("utf-8"))
+
+        print(f"{username} entrou (ID {user_id})")
         broadcast_server(
             f">> {username} entrou no chat\n".encode("utf-8")
         )
@@ -33,20 +37,19 @@ def handle_client(client):
 
     while True:
         try:
-            msg = client.recv(2048)
+            # ALTERAÇÃO: recebe bytes, não assume texto
+            msg = client.recv(4096)
             if not msg:
                 break
 
             with clients_lock:
                 if client not in clients:
                     break
-                user = clients[client]
 
-            full_msg = f"{user['name']}: {msg.decode('utf-8')}"
-            broadcast_client(full_msg.encode("utf-8"), client)
+            # ALTERAÇÃO: repassa bytes puros
+            broadcast_client(msg, client)
 
         except Exception:
-            print("\nOcorreu um erro inesperado")
             break
 
     remove_client(client)
@@ -61,7 +64,6 @@ def broadcast_client(msg, sender):
             try:
                 client.send(msg)
             except Exception:
-                print("\nOcorreu um erro inesperado")
                 remove_client(client)
 
 
@@ -73,7 +75,6 @@ def broadcast_server(msg):
         try:
             client.send(msg)
         except Exception:
-            print("\nOcorreu um erro inesperado")
             remove_client(client)
 
 
@@ -100,13 +101,12 @@ def main():
     print("Servidor iniciado")
 
     while True:
-        client, addr = server.accept()
-        thread = threading.Thread(
+        client, _ = server.accept()
+        threading.Thread(
             target=handle_client,
             args=(client,),
             daemon=True
-        )
-        thread.start()
+        ).start()
 
 
 if __name__ == "__main__":
