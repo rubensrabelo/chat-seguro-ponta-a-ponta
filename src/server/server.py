@@ -7,8 +7,10 @@ clients_lock = threading.Lock()
 
 
 def handle_client(client):
+    """
+    Gerencia a conexão e repassa mensagens de um cliente.
+    """
     try:
-        # ALTERAÇÃO: username continua em texto
         username = client.recv(2048).decode("utf-8")
 
         with clients_lock:
@@ -23,7 +25,6 @@ def handle_client(client):
             available_ids.remove(user_id)
             clients[client] = {"id": user_id, "name": username}
 
-        # ALTERAÇÃO: envia o ID do usuário
         client.send(f"ID:{user_id}".encode("utf-8"))
 
         print(f"{username} entrou (ID {user_id})")
@@ -37,7 +38,6 @@ def handle_client(client):
 
     while True:
         try:
-            # ALTERAÇÃO: recebe bytes, não assume texto
             msg = client.recv(4096)
             if not msg:
                 break
@@ -46,7 +46,6 @@ def handle_client(client):
                 if client not in clients:
                     break
 
-            # ALTERAÇÃO: repassa bytes puros
             broadcast_client(msg, client)
 
         except Exception:
@@ -56,6 +55,9 @@ def handle_client(client):
 
 
 def broadcast_client(msg, sender):
+    """
+    Envia mensagem de um cliente para os demais conectados.
+    """
     with clients_lock:
         targets = list(clients.keys())
 
@@ -68,6 +70,9 @@ def broadcast_client(msg, sender):
 
 
 def broadcast_server(msg):
+    """
+    Envia mensagens do servidor para todos os clientes.
+    """
     with clients_lock:
         targets = list(clients.keys())
 
@@ -79,6 +84,9 @@ def broadcast_server(msg):
 
 
 def remove_client(client):
+    """
+    Remove um cliente e libera seu ID.
+    """
     with clients_lock:
         if client not in clients:
             return
@@ -95,6 +103,9 @@ def remove_client(client):
 
 
 def main():
+    """
+    Inicia o servidor e aceita conexões de clientes.
+    """
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(("localhost", 7777))
     server.listen()
