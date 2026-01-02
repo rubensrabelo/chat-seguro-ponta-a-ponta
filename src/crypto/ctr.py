@@ -3,7 +3,11 @@ from crypto.aes_block import aes_encrypt_block
 
 BLOCK_SIZE = 16
 
+
 def encrypt(key, plaintext):
+    """
+    Criptografa dados usando AES no modo CTR.
+    """
     nonce = os.urandom(8)
     counter = 0
     ciphertext = b''
@@ -17,7 +21,11 @@ def encrypt(key, plaintext):
 
     return nonce + ciphertext
 
+
 def decrypt(key, ciphertext):
+    """
+    Descriptografa dados usando AES no modo CTR.
+    """
     nonce = ciphertext[:8]
     data = ciphertext[8:]
     counter = 0
