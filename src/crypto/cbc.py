@@ -3,17 +3,33 @@ from crypto.aes_block import aes_encrypt_block, aes_decrypt_block
 
 BLOCK_SIZE = 16
 
+
 def xor(a, b):
+    """
+    Aplica XOR byte a byte entre dois blocos.
+    """
     return bytes(x ^ y for x, y in zip(a, b))
 
+
 def pad(data):
+    """
+    Aplica padding PKCS#7 ao texto plano.
+    """
     pad_len = BLOCK_SIZE - len(data) % BLOCK_SIZE
     return data + bytes([pad_len] * pad_len)
 
+
 def unpad(data):
+    """
+    Remove o padding PKCS#7 do texto plano.
+    """
     return data[:-data[-1]]
 
+
 def encrypt(key, plaintext):
+    """
+    Criptografa dados usando AES no modo CBC.
+    """
     iv = os.urandom(BLOCK_SIZE)
     plaintext = pad(plaintext)
 
@@ -29,7 +45,11 @@ def encrypt(key, plaintext):
 
     return iv + b''.join(blocks)
 
+
 def decrypt(key, ciphertext):
+    """
+    Descriptografa dados usando AES no modo CBC.
+    """
     iv = ciphertext[:BLOCK_SIZE]
     data = ciphertext[BLOCK_SIZE:]
 
