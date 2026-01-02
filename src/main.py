@@ -1,30 +1,26 @@
 import sys
 
-# IMPORTA as funções main já existentes
 from server.server import main as start_server
 from client.client import main as start_client
 
 
 def run_server():
     """
-    Função responsável por iniciar o servidor de chat.
-    Deve ser executada em um terminal separado.
+    Inicia o servidor responsável por intermediar a comunicação do chat.
     """
     start_server()
 
 
 def run_client():
     """
-    Função responsável por iniciar um cliente do chat.
-    Cada cliente deve ser executado em um terminal separado.
+    Inicia um cliente que se conecta ao servidor de chat.
     """
     start_client()
 
 
 def main():
     """
-    Ponto de entrada principal do sistema.
-    Permite escolher se o processo será servidor ou cliente.
+    Define se o programa será executado como servidor ou cliente.
     """
     if len(sys.argv) != 2:
         print("Uso:")
