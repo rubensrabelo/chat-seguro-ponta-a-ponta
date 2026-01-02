@@ -7,7 +7,6 @@ from crypto import rsa_utils, cbc, ctr
 
 stop_event = threading.Event()
 
-# ESTADO CRIPTOGRÁFICO
 private_key, public_key = rsa_utils.generate_keys()
 session_key = None
 mode = None
@@ -16,11 +15,17 @@ MODE_FILE = "./src/client/crypto_mode.txt"
 
 
 def save_mode(selected_mode):
+    """
+    Salva o modo de operação escolhido pelo cliente 1.
+    """
     with open(MODE_FILE, "w") as f:
         f.write(selected_mode)
 
 
 def load_mode():
+    """
+    Carrega o modo de operação salvo em arquivo.
+    """
     if not os.path.exists(MODE_FILE):
         return None
     with open(MODE_FILE, "r") as f:
@@ -28,6 +33,9 @@ def load_mode():
 
 
 def receiveMessages(client):
+    """
+    Recebe mensagens do servidor e realiza a descriptografia.
+    """
     global session_key
 
     while not stop_event.is_set():
@@ -36,7 +44,6 @@ def receiveMessages(client):
             if not msg:
                 break
 
-            # TROCA DE CHAVES
             if msg.startswith(b"RSAKEY:"):
                 other_pub = msg[7:]
                 if user_id == 1:
@@ -71,6 +78,9 @@ def receiveMessages(client):
 
 
 def sendMessages(client):
+    """
+    Lê mensagens do usuário e envia ao servidor.
+    """
     while not stop_event.is_set():
         msg = input()
         if session_key:
@@ -85,6 +95,9 @@ def sendMessages(client):
 
 
 def main():
+    """
+    Inicializa o cliente e gerencia a comunicação segura.
+    """
     global user_id, mode
 
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -93,18 +106,16 @@ def main():
     username = input("Usuário> ")
     client.send(username.encode())
 
-    # RECEBE ID
     user_id = int(client.recv(16).decode().split(":")[1])
     print(f">> Seu ID: {user_id}")
 
     if user_id == 1:
         mode = input("Modo (CBC/CTR)> ").strip().upper()
-        save_mode(mode)  # <<< SALVA O MODO
+        save_mode(mode)
     else:
-        mode = load_mode()  # <<< CARREGA O MODO
+        mode = load_mode()
         print(f">> Modo carregado: {mode}")
 
-    # ENVIA CHAVE PÚBLICA
     client.send(b"RSAKEY:" + public_key)
 
     t1 = threading.Thread(target=receiveMessages, args=(client,))
