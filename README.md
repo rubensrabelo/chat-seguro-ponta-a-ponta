@@ -168,7 +168,7 @@ O modo CTR (Counter Mode) foi implementado como um cifrador de fluxo:
 O modo CTR é mais simples e flexível, enquanto o CBC exige maior cuidado com padding e
 ordem dos blocos.
 
-## 9. 9. Decisões de Projeto, Desafios e Soluções
+## 9. Decisões de Projeto, Desafios e Soluções
 
 ### 9.1 Decições do Projeto
 
