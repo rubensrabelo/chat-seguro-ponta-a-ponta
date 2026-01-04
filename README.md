@@ -32,10 +32,10 @@ estrutura abaixo:
 
 ### 2.1 Funcionamento Geral
 
-* O **servidor** aceita no máximo dois clientes simultaneamente.
-* Cada cliente recebe um **ID único** (1 ou 2).
-* O servidor apenas **repassa bytes**, não realizando criptografia ou descriptografia.
-* A segurança é implementada **exclusivamente nos clientes**.
+* O servidor aceita no máximo dois clientes simultaneamente.
+* Cada cliente recebe um ID único (1 ou 2).
+* O servidor apenas repassa bytes, não realizando criptografia ou descriptografia.
+* A segurança é implementada exclusivamente nos clientes.
 
 ### 2.2 Execução do Sistema
 
@@ -87,7 +87,7 @@ Ativação do ambiente virtual:
 
 ### 3.1 Criptografia Assimétrica
 
-Foi utilizado o algoritmo RSA com chaves de 2048 bits**, por meio da biblioteca
+Foi utilizado o algoritmo RSA com chaves de 2048 bits, por meio da biblioteca
 `PyCryptodome`, juntamente com o esquema de padding OAEP (PKCS#1 OAEP).
 
 O RSA é usado exclusivamente para a troca segura da chave de sessão, e não para
@@ -168,10 +168,56 @@ O modo CTR (Counter Mode) foi implementado como um cifrador de fluxo:
 O modo CTR é mais simples e flexível, enquanto o CBC exige maior cuidado com padding e
 ordem dos blocos.
 
-## 8. Considerações de Segurança
+## 9. 9. Decisões de Projeto, Desafios e Soluções
+
+### 9.1 Decições do Projeto
+
+* A linguagem escolhida foi Python, devido à sua facilidade de
+aprendizado, legibilidade do código e ampla disponibilidade de
+bibliotecas criptográficas, o que facilitou a comunicação e o
+desenvolvimento em dupla.
+* A limitação do sistema a dois clientes foi uma decisão de projeto
+adotada para simplificar a implementação e o controle de variáveis
+compartilhadas, reduzindo problemas de concorrência entre threads.
+* A modularização do sistema foi adotada como escolha de projeto,
+separando o código em módulos distintos (cliente, servidor e
+criptografia), o que facilitou a organização, manutenção e
+compreensão geral da aplicação.
+* A utilização de ambiente virtual e instalação das dependências via
+requirements.txt foi adotada para garantir isolamento do ambiente,
+reprodutibilidade do sistema e evitar conflitos entre versões de
+bibliotecas.
+
+### 9.2 Dificuldades
+
+* **Dificuldade 1:** Compreensão e implementação do processo de troca de
+chaves, incluindo a geração da chave de sessão utilizando criptografia
+assimétrica (RSA).
+* **Dificuldade 2:** Implementação dos modos de operação do AES (CBC e
+CTR), bem como a definição de um mecanismo confiável para a escolha e
+compartilhamento do modo entre os clientes.
+* **Dificuldade 3:** Problemas relacionados à concorrência, principalmente
+no uso de variáveis globais em conjunto com threads, causando conflitos
+e comportamentos inesperados durante a execução.
+
+### 9.3 Soluções
+
+* **Solução 1:** O sistema foi limitado a dois usuários identificados, o
+que simplificou o controle do fluxo de mensagens e da troca de chaves,
+reduzindo a complexidade da comunicação.
+* **Solução 2:** Inicialmente, tentou-se armazenar o modo de operação em
+variáveis globais, porém essa abordagem gerou conflitos entre threads.
+Como solução, a escolha do modo de operação passou a ser salva em um
+arquivo .txt no lado do cliente.
+* **Solução 3:** O Cliente 1 escolhe o modo de operação criptográfico, o
+programa salva essa escolha no arquivo e o Cliente 2 carrega o modo a
+partir desse arquivo, garantindo consistência na comunicação sem
+conflitos de concorrência.
+
+## 10. Considerações de Segurança
 
 * O servidor não possui acesso ao texto em claro.
 * O uso incorreto de IVs ou nonces pode comprometer a segurança.
-* O sistema **não implementa autenticação de mensagens**, sendo vulnerável a ataques de
+* O sistema não implementa autenticação de mensagens sendo vulnerável a ataques de
   modificação (ex: bit-flipping).
-* O objetivo do trabalho é **educacional**, focado na compreensão dos conceitos.
+* O objetivo do trabalho é educacional, focado na compreensão dos conceitos.
